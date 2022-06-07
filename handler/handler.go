@@ -42,7 +42,7 @@ func SearchHandler(c *gin.Context) {
 	res := make(map[[2]string]int, 0)
 	if len(notLike) != 0 {
 		for _, url := range urls {
-			_, ok := notLike[url[1]]
+			_, ok := notLike[url[0]]
 			if !ok {
 				res[url] = 1
 			}
