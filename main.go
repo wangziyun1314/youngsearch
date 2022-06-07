@@ -10,7 +10,7 @@ import (
 func main() {
 	Init()
 	r := gin.Default()
-	r.POST("/search", func(c *gin.Context) {
+	r.GET("/search", func(c *gin.Context) {
 		handler.SearchHandler(c)
 	})
 	r.Run()
@@ -20,4 +20,5 @@ func main() {
 func Init() {
 	index.IndexInit() // 初始化索引
 	utils.InitSeg()   // 初始化jieba分词
+	index.InitTris()  // 初始化字典树
 }

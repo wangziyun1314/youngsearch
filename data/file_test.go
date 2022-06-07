@@ -35,3 +35,8 @@ func TestPut2Csv1(t *testing.T) {
 	utils.InitSeg()
 	Put2Csv()
 }
+
+func TestPut2TermCsv(t *testing.T) {
+	err := Put2TermCsv("../tries.csv")
+	fmt.Println(err)
+}

@@ -3,14 +3,21 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"sync"
+	"youngsearch/index"
 	"youngsearch/search"
 	"youngsearch/utils"
 )
 
 // SearchHandler 对输入的字符串进行搜索
 func SearchHandler(c *gin.Context) {
-	param := c.PostForm("search")
-	filter := c.PostForm("filter")
+	param := c.DefaultQuery("content", "")
+	if param == "" {
+		c.JSON(-1, gin.H{
+			"message": "content is empty",
+		})
+		return
+	}
+	filter := c.DefaultQuery("filter", "")
 	waitGroup := sync.WaitGroup{}
 	notLike := make(map[string]int, 0)
 	// 如果filter字段为空
@@ -32,25 +39,32 @@ func SearchHandler(c *gin.Context) {
 		})
 		return
 	}
-	res := make([][2]string, 0)
+	res := make(map[[2]string]int, 0)
 	if len(notLike) != 0 {
 		for _, url := range urls {
 			_, ok := notLike[url[1]]
 			if !ok {
-				res = append(res, url)
+				res[url] = 1
 			}
 		}
-		//c.JSON(200, gin.H{
-		//	"message": res,
-		//})
 	} else {
-		//c.JSON(200, gin.H{
-		//	"message": urls,
-		//})
-		res = urls
+		for _, url := range urls {
+			res[url] = 1
+		}
 	}
-	res = search.TfIdf(utils.Seg.Cut(param, true), res)
+	msg := make([][2]string, 0)
+	for k, _ := range res {
+		msg = append(msg, k)
+	}
+	msg = search.TfIdf(utils.Seg.Cut(param, true), msg)
+	if !utils.BloomFilter.Check(param) {
+		index.UpdateTries(param)
+	}
+	recommend := index.WordTries.Recommend(param)
+	index.WordTries.Insert(param)
+	pages := utils.GetPages(msg)
 	c.JSON(200, gin.H{
-		"message": res,
+		"pages":     pages,
+		"recommend": recommend,
 	})
 }

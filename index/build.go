@@ -122,15 +122,18 @@ var WordTries *utils.Trie
 // InitTris 由常用的搜索词库来进行初始化字典树
 func InitTris() {
 	WordTries = utils.NewTries()
-	file, err := os.Open("./Tries.csv")
+	utils.BloomFilter = utils.NewBloomFilter(nil)
+	file, err := os.Open(utils.TriesFileName)
 	defer file.Close()
 	if err != nil {
 		panic(err)
 	}
 	scanner := bufio.NewScanner(file)
+	scanner.Scan()
 	for scanner.Scan() {
 		word := scanner.Text()
 		WordTries.Insert(word)
+		utils.BloomFilter.Insert(word)
 	}
 }
 
@@ -139,10 +142,10 @@ func Recommend(word string) []string {
 	return WordTries.Recommend(word)
 }
 
-// UpdateTries 根据输入的词扩充常用词库，并且更新字典树
+// UpdateTries 根据输入的词扩充常用词库
 func UpdateTries(word string) {
 	WordTries.Insert(word)
-	file, err := os.OpenFile("./Tries.csv", os.O_APPEND, 0777)
+	file, err := os.OpenFile(utils.TriesFileName, os.O_APPEND, 0777)
 	defer file.Close()
 	if err != nil {
 		fmt.Println(err)

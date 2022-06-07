@@ -78,3 +78,6 @@ func (bf *bloomFilter) Clear() {
 	}
 	bf.bits = make([]uint64, 0, 0)
 }
+
+// BloomFilter 在内存中存放一个布隆过滤器
+var BloomFilter *bloomFilter

@@ -57,6 +57,7 @@ func Put2Csv() error {
 	return nil
 }
 
+// Put2Db 将元数据入库到mysql
 func Put2Db(fileName string, index int) int {
 	file, err := os.Open(fileName)
 	if err != nil {
@@ -92,6 +93,7 @@ func Put2Db(fileName string, index int) int {
 	return index
 }
 
+// Put2Csvs 和上面的只是参数不一样
 func Put2Csvs(fileName string) error {
 	file, err := os.Create(fileName)
 	if err != nil {
@@ -131,6 +133,23 @@ func Put2Csvs(fileName string) error {
 		s := builder.String()
 		s2 := s[0 : len(s)-1]
 		writer.Write([]string{strconv.Itoa(index), s2})
+	}
+	return nil
+}
+
+func Put2TermCsv(fileName string) error {
+	file, err := os.Create(fileName)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+	writer.Write([]string{"content"})
+	var photos []Photo
+	Db.Find(&photos)
+	for _, photo := range photos {
+		writer.Write([]string{photo.Content})
 	}
 	return nil
 }
